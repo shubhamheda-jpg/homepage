@@ -1,0 +1,459 @@
+import * as React from "react";
+import { useState } from "react";
+
+export default function HomepageMockup() {
+  const [query, setQuery] = useState("");
+  const [focused, setFocused] = useState(false);
+  const [highlight, setHighlight] = useState(-1);
+  const SUGGESTIONS: { label: string; type: "product" | "category" | "sku" }[] = [
+    { label: "Nitrile Disposable Gloves", type: "product" },
+    { label: "Paper Cups 12oz", type: "product" },
+    { label: "Chef Jackets", type: "product" },
+    { label: "Floor Cleaner 5L", type: "product" },
+    { label: "High-Vis Jacket", type: "product" },
+    { label: "Workwear & PPE", type: "category" },
+    { label: "Cleaning & Hygiene", type: "category" },
+    { label: "Catering Disposables", type: "category" },
+    { label: "Cleaning Machinery", type: "category" },
+    { label: "SKU: GLV-NTL-100", type: "sku" },
+  ];
+  const matches = query.length >= 2
+    ? SUGGESTIONS.filter(s => s.label.toLowerCase().includes(query.toLowerCase())).slice(0, 6)
+    : [];
+
+  const handleKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!matches.length) return;
+    if (e.key === "ArrowDown") {
+      setHighlight((prev) => (prev + 1) % matches.length);
+      e.preventDefault();
+    } else if (e.key === "ArrowUp") {
+      setHighlight((prev) => (prev - 1 + matches.length) % matches.length);
+      e.preventDefault();
+    } else if (e.key === "Enter" && highlight >= 0) {
+      setQuery(matches[highlight].label);
+      setFocused(false);
+      e.preventDefault();
+    }
+  };
+
+  return (
+    <div className="bg-white text-gray-900 pb-16 md:pb-0">
+      {/* Skip link for accessibility */}
+      <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 bg-blue-600 text-white px-3 py-2 rounded">
+        Skip to content
+      </a>
+
+      {/* Header with utility bar */}
+      <header className="sticky top-0 z-50 shadow-sm">
+        <div className="bg-[#0d223d] text-white text-xs py-1">
+          <div className="max-w-7xl mx-auto px-6 flex justify-between">
+            <span>📞 0800-123-456</span>
+            <div className="flex gap-4">
+              <a href="#reorder">Reorder</a>
+              <a href="#track">Track Order</a>
+              <a href="#support">Support</a>
+            </div>
+          </div>
+        </div>
+        <div className="bg-[#16355f] text-white">
+          <div className="max-w-7xl mx-auto px-6 py-3 flex items-center gap-6">
+            <div className="shrink-0 flex items-center gap-2">
+              <div className="h-8 w-28 bg-white/20 rounded" />
+              <span className="sr-only">UNICO Direct</span>
+            </div>
+            <div className="flex-1">
+              <div className="relative">
+                <input
+                  value={query}
+                  onChange={(e) => { setQuery(e.target.value); setHighlight(-1); }}
+                  onKeyDown={handleKey}
+                  onFocus={() => setFocused(true)}
+                  onBlur={() => setTimeout(() => setFocused(false), 150)}
+                  placeholder="Search all categories (name, code, SKU)..."
+                  aria-label="Search products, SKUs and categories"
+                  role="combobox"
+                  aria-autocomplete="list"
+                  aria-controls="search-suggest"
+                  className="pl-3 pr-24 h-11 md:h-10 w-full rounded-xl bg-[#0f2a4a] border border-white/30 text-white placeholder:text-white/60"
+                />
+                <button className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg px-4 h-9 md:h-8 bg-blue-500 text-white text-sm">
+                  Search
+                </button>
+                {focused && matches.length > 0 && (
+                  <div id="search-suggest" role="listbox" className="absolute left-0 right-0 mt-2 bg-white text-gray-800 rounded-xl shadow-xl border max-h-72 overflow-auto">
+                    <div className="px-3 py-2 text-xs text-gray-500">Suggestions</div>
+                    <ul className="divide-y">
+                      {matches.map((m, i) => (
+                        <li key={i}>
+                          <button
+                            role="option"
+                            onMouseDown={() => setQuery(m.label)}
+                            className={`w-full text-left px-3 py-2 flex items-center gap-2 ${highlight===i?"bg-blue-100":"hover:bg-gray-50"}`}
+                          >
+                            <span className="text-gray-500">{m.type[0].toUpperCase()}</span>
+                            <span className="text-sm">{m.label}</span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                    <a
+                      href={`/search?q=${encodeURIComponent(query)}`}
+                      className="block text-center text-sm px-3 py-2 hover:bg-gray-50 border-t"
+                      aria-label={`View all search results for ${query}`}
+                    >
+                      View all results
+                    </a>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <button className="relative rounded-md p-2 hover:bg-white/10">
+                🛒
+                <span className="absolute -top-1 -right-1 text-[10px] bg-sky-400 text-[#0f2a4a] rounded-full h-5 w-5 grid place-items-center font-bold">
+                  0
+                </span>
+              </button>
+              <button className="bg-sky-500 hover:bg-sky-400 text-[#0f2a4a] rounded-lg px-3 py-1 text-sm">Login</button>
+            </div>
+          </div>
+        </div>
+        {/* Mega menu placeholder (desktop only) */}
+        <nav className="bg-[#3b92ca] text-white hidden md:block">
+          <div className="max-w-7xl mx-auto px-6">
+            <ul className="flex items-center justify-between text-sm font-semibold py-2 gap-6">
+              {["Cleaning & Hygiene","Workwear & PPE","Catering Disposables","Cleaning Machinery","Hotels & Hospitality"].map(c=>(
+                <li key={c} className="relative group">
+                  <a href={'/category/'+c.toLowerCase().replace(/[^a-z0-9]+/g,'-')} className="hover:opacity-90">{c}</a>
+                  <div className="absolute left-0 top-full bg-white text-gray-800 shadow-lg rounded hidden group-hover:block p-4 w-64">
+                    <p className="text-sm mb-2 font-semibold">Top {c} links</p>
+                    <ul className="space-y-1 text-sm">
+                      <li><a href="#">Sub-link 1</a></li>
+                      <li><a href="#">Sub-link 2</a></li>
+                      <li><a href="#">Sub-link 3</a></li>
+                    </ul>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </nav>
+      </header>
+
+      {/* Trust band under hero */}
+      <div className="bg-blue-600 text-white text-sm py-2">
+        <div className="max-w-7xl mx-auto flex flex-wrap justify-center gap-6">
+          <span>🚚 Free Next-Day Delivery over £100</span>
+          <span>🏭 100+ Years Experience</span>
+          <span>♻️ 97% Recyclable Packaging</span>
+          <span>✅ ISO Certified</span>
+        </div>
+      </div>
+
+      {/* Hero */}
+      <main id="main">
+        <section className="bg-gray-100">
+          <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12 grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-center">
+            <div>
+              <h1 className="text-3xl font-bold mb-3">Trusted Supplier of Hygiene, PPE, Catering & Workwear</h1>
+              <p className="mb-5 text-base">Serving businesses, government organisations, and hospitality across the UK since 1923.</p>
+              <div className="flex gap-3">
+                <button className="rounded-xl px-5 py-2 text-base bg-blue-600 text-white">Shop Now</button>
+                <button className="rounded-xl px-5 py-2 text-base border">Open an Account</button>
+              </div>
+            </div>
+            <img
+              src="/images/hero.jpg"
+              alt="Hygiene, PPE, catering and workwear supplies"
+              className="rounded-xl shadow-md h-40 md:h-56 w-full object-cover"
+              loading="eager"
+            />
+          </div>
+
+          {/* Category chips (horizontal scroll on mobile) */}
+          <div className="max-w-7xl mx-auto px-6 py-4">
+            <div className="flex gap-2 overflow-x-auto md:flex-wrap md:overflow-visible whitespace-nowrap">
+              {["Gloves","Paper","Workwear","Cleaners","Machines","Hospitality"].map(c=>(
+                <a key={c} href={'/category/'+c.toLowerCase()} className="px-4 py-2 bg-white border rounded-full text-sm hover:bg-blue-50 inline-block">
+                  {c}
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Benefits */}
+        <section className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-10 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 text-center">
+          {[
+            { title: "Customer Service", text: "Dedicated team for procurement, tenders and quotes." },
+            { title: "Nationwide Delivery", text: "Fast UK delivery with tracked orders." },
+            { title: "Sustainability", text: "97% recyclable packaging and eco options." },
+          ].map((b) => (
+            <div key={b.title} className="p-6 bg-white rounded-xl border">
+              <h2 className="font-semibold text-lg mb-2">{b.title}</h2>
+              <p className="text-sm text-gray-600">{b.text}</p>
+            </div>
+          ))}
+        </section>
+
+        {/* Shop by Category */}
+        <section className="bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 md:px-6 py-12">
+            <h2 className="text-xl font-bold mb-6">Shop by Category</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 md:gap-4">
+              {["Cleaning & Hygiene","Workwear & PPE","Catering Disposables","Cleaning Machinery","Hotels & Hospitality"].map(c => (
+                <a key={c} href={'/category/'+c.toLowerCase().replace(/[^a-z0-9]+/g,'-')} className="p-5 bg-white rounded-xl border text-center text-sm font-medium hover:shadow">
+                  {c}
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Featured Products – mobile carousel + desktop grid */}
+        <section className="max-w-7xl mx-auto px-6 py-12">
+          <h2 className="text-xl font-bold mb-6">Featured Products</h2>
+
+          {/* Mobile carousel */}
+          <div className="md:hidden overflow-x-auto snap-x snap-mandatory -mx-4 px-4">
+            <div className="flex gap-4">
+              {[1,2,3,4].map(i => (
+                <a key={i} href={`/product/${i}`} className="min-w-[260px] bg-white rounded-xl border p-4 block hover:shadow snap-start">
+                  <img src="/images/product.jpg" alt={`Featured product ${i}`} className="h-32 w-full object-cover rounded mb-3" loading="lazy" />
+                  <div className="text-xs text-gray-500 mb-1">Pack of 24 • Best Seller</div>
+                  <h3 className="font-semibold text-sm mb-1">Product {i}</h3>
+                  <div className="font-bold text-sm mb-3">{"£"}{(i*19.99).toFixed(2)} <span className="text-gray-500 font-normal">excl. VAT</span></div>
+                  <div className="flex items-center gap-2">
+                    <button className="flex-1 h-9 rounded-md bg-blue-600 text-white text-sm">Add to Basket</button>
+                    <button className="h-9 w-9 rounded-md border">+</button>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Desktop grid */}
+          <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-6">
+            {[1,2,3,4].map(i => (
+              <a key={i} href={`/product/${i}`} className="bg-white rounded-xl border p-4 block hover:shadow">
+                <img src="/images/product.jpg" alt={`Featured product ${i}`} className="h-32 w-full object-cover rounded mb-3" loading="lazy" />
+                <div className="text-sm text-gray-500 mb-1">Pack of 24 • Best Seller</div>
+                <h3 className="font-semibold text-sm mb-1">Product {i}</h3>
+                <div className="font-bold text-sm mb-3">{"£"}{(i*19.99).toFixed(2)} <span className="text-gray-500 font-normal">excl. VAT</span></div>
+                <div className="flex items-center gap-2">
+                  <button className="flex-1 h-9 rounded-md bg-blue-600 text-white text-sm">Add to Basket</button>
+                  <button className="h-9 w-9 rounded-md border">+</button>
+                </div>
+              </a>
+            ))}
+          </div>
+        </section>
+
+        {/* Brands – mobile carousel + desktop grid */}
+        <section className="bg-gray-50 py-10">
+          <div className="max-w-7xl mx-auto px-6">
+            <h2 className="text-xl font-bold mb-5">Featured Brands</h2>
+
+            {/* Mobile */}
+            <div className="md:hidden overflow-x-auto snap-x snap-mandatory -mx-4 px-4">
+              <div className="flex gap-4">
+                {[1,2,3,4,5,6].map((b) => (
+                  <div key={b} className="min-w-[120px] h-12 bg-white border rounded-lg snap-start" />
+                ))}
+              </div>
+            </div>
+
+            {/* Desktop */}
+            <div className="hidden md:grid grid-cols-6 gap-4 items-center">
+              {[1,2,3,4,5,6].map((b) => (
+                <div key={b} className="h-12 bg-white border rounded-lg" />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Contract CTA */}
+        <section className="bg-blue-600 text-white">
+          <div className="max-w-7xl mx-auto px-6 py-8 grid md:grid-cols-2 gap-6 items-center">
+            <div>
+              <h2 className="text-xl font-bold mb-2">Need Contract Supply or a Quote?</h2>
+              <p className="opacity-90 text-sm">Lock in pricing, set delivery schedules, and streamline procurement with a dedicated account manager.</p>
+            </div>
+            <div className="flex gap-3 md:justify-end">
+              <a className="rounded-lg px-5 py-2 text-sm bg-white text-blue-700" href="/quote">Request a Quote</a>
+              <a className="rounded-lg px-5 py-2 text-sm border border-white/80" href="/contact">Speak to Sales</a>
+            </div>
+          </div>
+        </section>
+
+        {/* Testimonials – mobile carousel + desktop grid */}
+        <section className="bg-white py-12">
+          <div className="max-w-7xl mx-auto px-6">
+            <h2 className="text-xl font-bold mb-6">What Our Clients Say</h2>
+
+            {/* Mobile */}
+            <div className="md:hidden overflow-x-auto snap-x snap-mandatory -mx-4 px-4">
+              <div className="flex gap-4">
+                {["Excellent service and rapid delivery across multiple sites.","Great quality products and support.","Reliable supplier for our hotel group."].map((t,i) => (
+                  <div key={i} className="min-w-[260px] rounded-xl border p-5 bg-white snap-start">
+                    <p className="mb-3 text-sm">{"\""+t+"\""}</p>
+                    <p className="text-xs text-gray-500">Procurement Lead</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Desktop */}
+            <div className="hidden md:grid md:grid-cols-3 gap-6">
+              {["Excellent service and rapid delivery across multiple sites.","Great quality products and support.","Reliable supplier for our hotel group."].map((t,i) => (
+                <div key={i} className="rounded-xl border p-5 bg-white">
+                  <p className="mb-3 text-sm">{"\""+t+"\""}</p>
+                  <p className="text-xs text-gray-500">Procurement Lead</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Blog / Insights – mobile carousel + desktop grid */}
+        <section className="bg-gray-50 py-12">
+          <div className="max-w-7xl mx-auto px-6">
+            <h2 className="text-xl font-bold mb-6">Insights & Guides</h2>
+
+            {/* Mobile */}
+            <div className="md:hidden overflow-x-auto snap-x snap-mandatory -mx-4 px-4">
+              <div className="flex gap-4">
+                {[1,2,3].map(i => (
+                  <a key={i} href={`/blog/${i}`} className="min-w-[260px] rounded-xl border bg-white overflow-hidden block hover:shadow snap-start">
+                    <div className="h-32 bg-gray-200" />
+                    <div className="p-4">
+                      <h3 className="font-semibold mb-1 text-sm">How to choose compliant PPE ({i})</h3>
+                      <p className="text-xs text-gray-600 mb-3">Practical guidance for procurement and H&S managers.</p>
+                      <span className="inline-block h-8 text-xs px-3 border rounded-md leading-8">Read Article</span>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {/* Desktop */}
+            <div className="hidden md:grid md:grid-cols-3 gap-6">
+              {[1,2,3].map(i => (
+                <a key={i} href={`/blog/${i}`} className="rounded-xl border bg-white overflow-hidden block hover:shadow">
+                  <div className="h-32 bg-gray-200" />
+                  <div className="p-4">
+                    <h3 className="font-semibold mb-1 text-sm">How to choose compliant PPE ({i})</h3>
+                    <p className="text-xs text-gray-600 mb-3">Practical guidance for procurement and H&S managers.</p>
+                    <span className="inline-block h-8 text-xs px-3 border rounded-md leading-8">Read Article</span>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Case Studies + Logo wall – mobile carousels + desktop grid */}
+        <section className="bg-white py-12">
+          <div className="max-w-7xl mx-auto px-6">
+            <h2 className="text-xl font-bold mb-6">Trusted By Leading Organisations</h2>
+
+            {/* Logos – mobile */}
+            <div className="md:hidden overflow-x-auto snap-x snap-mandatory -mx-4 px-4 mb-6">
+              <div className="flex gap-4">
+                {[1,2,3,4,5,6].map((c) => (
+                  <div key={c} className="min-w-[120px] h-12 bg-gray-100 rounded-lg flex items-center justify-center text-gray-500 text-xs font-medium snap-start">
+                    Logo {c}
+                  </div>
+                ))}
+              </div>
+            </div>
+            {/* Logos – desktop */}
+            <div className="hidden md:grid grid-cols-6 gap-4 items-center mb-8">
+              {[1,2,3,4,5,6].map((c) => (
+                <div key={c} className="h-12 bg-gray-100 rounded-lg flex items-center justify-center text-gray-500 text-xs font-medium">
+                  Logo {c}
+                </div>
+              ))}
+            </div>
+
+            {/* Case studies – mobile */}
+            <div className="md:hidden overflow-x-auto snap-x snap-mandatory -mx-4 px-4">
+              <div className="flex gap-4">
+                {[1,2].map(i => (
+                  <a key={i} href={`/case-study/${i}`} className="min-w-[260px] rounded-xl border p-5 bg-gray-50 block hover:shadow snap-start">
+                    <h3 className="font-semibold mb-2 text-sm">Case Study {i}</h3>
+                    <p className="text-xs text-gray-600 mb-3">Supplying multi-site organisations with contract pricing and delivery.</p>
+                    <span className="inline-block h-8 text-xs px-3 border rounded-md leading-8">Read More</span>
+                  </a>
+                ))}
+              </div>
+            </div>
+            {/* Case studies – desktop */}
+            <div className="hidden md:grid md:grid-cols-2 gap-6">
+              {[1,2].map(i => (
+                <a key={i} href={`/case-study/${i}`} className="rounded-xl border p-5 bg-gray-50 block hover:shadow">
+                  <h3 className="font-semibold mb-2 text-sm">Case Study {i}</h3>
+                  <p className="text-xs text-gray-600 mb-3">Supplying multi-site organisations with contract pricing and delivery.</p>
+                  <span className="inline-block h-8 text-xs px-3 border rounded-md leading-8">Read More</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ */}
+        <section className="bg-white py-12">
+          <div className="max-w-4xl mx-auto px-6">
+            <h2 className="text-xl font-bold mb-4">Frequently Asked Questions</h2>
+            <div className="space-y-3">
+              {[
+                { q: "Do you offer credit accounts?", a: "Yes, business accounts with agreed terms are available subject to checks." },
+                { q: "Can you deliver to multiple sites?", a: "We support multi-site deliveries and scheduled drops." },
+                { q: "How do bulk discounts work?", a: "Tiered pricing applies automatically for case quantities." }
+              ].map((f) => (
+                <details key={f.q} className="rounded-lg border p-3">
+                  <summary className="font-medium cursor-pointer text-sm">{f.q}</summary>
+                  <p className="mt-1 text-xs text-gray-600">{f.a}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Contact / Appointment */}
+        <section className="bg-blue-50 py-12">
+          <div className="max-w-5xl mx-auto px-6 grid md:grid-cols-2 gap-6 items-start">
+            <div>
+              <h2 className="text-xl font-bold mb-2">Book a Consultation</h2>
+              <p className="text-gray-600 mb-4 text-sm">Speak with our sales team about contracts, tender support, or product advice.</p>
+              <div className="rounded-xl bg-gray-200 h-48" />
+            </div>
+            <form className="bg-white rounded-xl p-5 border">
+              <div className="grid grid-cols-2 gap-3">
+                <input placeholder="First Name" className="h-8 text-sm border rounded px-3" />
+                <input placeholder="Last Name" className="h-8 text-sm border rounded px-3" />
+                <input placeholder="Company" className="col-span-2 h-8 text-sm border rounded px-3" />
+                <input placeholder="Email" className="col-span-2 h-8 text-sm border rounded px-3" />
+                <input placeholder="Contact Number" className="col-span-2 h-8 text-sm border rounded px-3" />
+              </div>
+              <textarea placeholder="Tell us about your enquiry..." className="w-full mt-3 rounded-lg border p-2 min-h-[80px] text-sm"></textarea>
+              <div className="mt-3 flex gap-2">
+                <button className="px-4 h-8 text-sm bg-blue-600 text-white rounded">Request Callback</button>
+                <button className="h-8 text-sm px-4 border rounded">Download Line Card</button>
+              </div>
+            </form>
+          </div>
+        </section>
+      </main>
+
+      {/* Sticky bottom mobile nav */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-inner md:hidden flex justify-around py-2 text-sm z-50 pb-[env(safe-area-inset-bottom)]">
+        <a href="/" className="flex flex-col items-center">🏠 Home</a>
+        <a href="/categories" className="flex flex-col items-center">📂 Categories</a>
+        <button onClick={()=>setFocused(true)} className="flex flex-col items-center">🔍 Search</button>
+        <a href="/reorder" className="flex flex-col items-center">⟳ Reorder</a>
+        <a href="/cart" className="flex flex-col items-center">🛒 Cart</a>
+      </nav>
+    </div>
+  );
+}
